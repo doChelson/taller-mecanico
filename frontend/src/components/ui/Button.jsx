@@ -5,12 +5,13 @@ const variants = {
   ghost: 'hover:bg-slate-100 text-slate-600',
 };
 
-export default function Button({ children, onClick, type = 'button', variant = 'primary', disabled, loading, className = '' }) {
+export default function Button({ children, onClick, type = 'button', variant = 'primary', disabled, loading, className = '', form }) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      form={form}
       className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
     >
       {loading && (
