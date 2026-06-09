@@ -5,7 +5,10 @@ import com.example.signin.model.OrdenTrabajo;
 import com.example.signin.model.Vehiculo;
 import com.example.signin.repository.OrdenTrabajoRepository;
 import com.example.signin.repository.VehiculoRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +17,9 @@ public class OrdenTrabajoService {
 
     private final OrdenTrabajoRepository ordenTrabajoRepository;
     private final VehiculoRepository vehiculoRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public OrdenTrabajoService(
             OrdenTrabajoRepository ordenTrabajoRepository,
@@ -28,12 +34,10 @@ public class OrdenTrabajoService {
     }
 
     public OrdenTrabajo crearOrden(OrdenTrabajoDTO dto) {
-
         Vehiculo vehiculo = vehiculoRepository.findById(dto.getVehiculoId())
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
         OrdenTrabajo orden = new OrdenTrabajo();
-
         orden.setEstado(dto.getEstado());
         orden.setDiagnosticoPreliminar(dto.getDiagnosticoPreliminar());
         orden.setVehiculo(vehiculo);
@@ -54,7 +58,10 @@ public class OrdenTrabajoService {
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
     }
 
+    @Transactional
     public void eliminar(Long id) {
-        ordenTrabajoRepository.deleteById(id);
+        entityManager.createNativeQuery("DELETE FROM orden_trabajo WHERE id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
     }
 }
