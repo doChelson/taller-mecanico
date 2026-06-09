@@ -3,6 +3,7 @@ package com.example.signin.controller;
 import com.example.signin.dto.OrdenTrabajoDTO;
 import com.example.signin.model.OrdenTrabajo;
 import com.example.signin.service.OrdenTrabajoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,17 +25,17 @@ public class OrdenTrabajoController {
     }
 
     @GetMapping("/{id}")
-    public OrdenTrabajo obtenerPorId(@PathVariable Long id) {
+    public OrdenTrabajo obtenerPorId(@PathVariable("id") Long id) {
         return ordenTrabajoService.obtenerPorId(id);
     }
 
     @GetMapping("/vehiculo/{vehiculoId}")
-    public List<OrdenTrabajo> obtenerPorVehiculo(@PathVariable Integer vehiculoId) {
+    public List<OrdenTrabajo> obtenerPorVehiculo(@PathVariable("vehiculoId") Integer vehiculoId) {
         return ordenTrabajoService.obtenerPorVehiculo(vehiculoId);
     }
 
     @GetMapping("/estado/{estado}")
-    public List<OrdenTrabajo> obtenerPorEstado(@PathVariable String estado) {
+    public List<OrdenTrabajo> obtenerPorEstado(@PathVariable("estado") String estado) {
         return ordenTrabajoService.obtenerPorEstado(estado);
     }
 
@@ -44,7 +45,8 @@ public class OrdenTrabajoController {
     }
 
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminar(@PathVariable("id") Long id) {
         ordenTrabajoService.eliminar(id);
     }
 }
