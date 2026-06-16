@@ -2,12 +2,31 @@ import { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import Table from '../components/ui/Table';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import { getDiagnosticos, createDiagnostico, updateDiagnostico, deleteDiagnostico } from '../api/diagnosticos';
 import { getOrdenes } from '../api/ordenes';
 
 const EMPTY = { fallas: '', observaciones: '', recomendaciones: '', ordenTrabajoId: '' };
+
+// ⚠️ Definido FUERA del componente para que React no lo destruya al re-renderizar
+function Textarea({ label, id, value, onChange, required, placeholder, rows = 3 }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <textarea
+        id={id}
+        value={value}
+        onChange={onChange}
+        required={required}
+        placeholder={placeholder}
+        rows={rows}
+        className="px-3 py-2 rounded-lg border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  );
+}
 
 export default function Diagnosticos() {
   const [diagnosticos, setDiagnosticos] = useState([]);
@@ -35,7 +54,12 @@ export default function Diagnosticos() {
   };
 
   const openCreate = () => { setForm(EMPTY); setFormError(''); setModal('create'); };
-  const openEdit = (d) => { setSelected(d); setForm({ fallas: d.fallas ?? '', observaciones: d.observaciones ?? '', recomendaciones: d.recomendaciones ?? '', ordenTrabajoId: d.ordenTrabajo?.id ?? '' }); setFormError(''); setModal('edit'); };
+  const openEdit = (d) => {
+    setSelected(d);
+    setForm({ fallas: d.fallas ?? '', observaciones: d.observaciones ?? '', recomendaciones: d.recomendaciones ?? '', ordenTrabajoId: d.ordenTrabajo?.id ?? '' });
+    setFormError('');
+    setModal('edit');
+  };
   const openDetail = (d) => { setSelected(d); setModal('detail'); };
   const openDelete = (d) => { setSelected(d); setFormError(''); setModal('delete'); };
   const close = () => { setModal(null); setSelected(null); };
@@ -82,14 +106,6 @@ export default function Diagnosticos() {
     }
   ];
 
-  const Textarea = ({ label, id, value, onChange, required, placeholder, rows = 3 }) => (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium text-slate-700">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>
-      <textarea id={id} value={value} onChange={onChange} required={required} placeholder={placeholder} rows={rows}
-        className="px-3 py-2 rounded-lg border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    </div>
-  );
-
   return (
     <Layout title="Diagnósticos">
       {error && <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
@@ -101,7 +117,8 @@ export default function Diagnosticos() {
       </div>
       <Table columns={columns} data={diagnosticos} loading={loading} emptyMessage="No hay diagnósticos registrados." />
 
-      <Modal isOpen={modal === 'create' || modal === 'edit'} onClose={close} title={modal === 'create' ? 'Nuevo Diagnóstico' : 'Editar Diagnóstico'}
+      <Modal isOpen={modal === 'create' || modal === 'edit'} onClose={close}
+        title={modal === 'create' ? 'Nuevo Diagnóstico' : 'Editar Diagnóstico'}
         footer={<><Button variant="secondary" onClick={close}>Cancelar</Button><Button type="submit" form="diag-form" loading={formLoading}>Guardar</Button></>}>
         {formError && <p className="mb-3 text-sm text-red-600">{formError}</p>}
         <form id="diag-form" onSubmit={handleSave} className="space-y-3">
@@ -113,9 +130,21 @@ export default function Diagnosticos() {
               {ordenes.map(o => <option key={o.id} value={o.id}>#{o.id} — {o.vehiculo?.patente ?? ''} ({o.estado})</option>)}
             </select>
           </div>
-          <Textarea label="Fallas detectadas" id="fallas" value={form.fallas} onChange={e => setForm(f => ({ ...f, fallas: e.target.value }))} required />
-          <Textarea label="Observaciones" id="observaciones" value={form.observaciones} onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))} />
-          <Textarea label="Recomendaciones" id="recomendaciones" value={form.recomendaciones} onChange={e => setForm(f => ({ ...f, recomendaciones: e.target.value }))} />
+          <Textarea
+            label="Fallas detectadas" id="fallas" required
+            value={form.fallas}
+            onChange={e => setForm(f => ({ ...f, fallas: e.target.value }))}
+          />
+          <Textarea
+            label="Observaciones" id="observaciones"
+            value={form.observaciones}
+            onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))}
+          />
+          <Textarea
+            label="Recomendaciones" id="recomendaciones"
+            value={form.recomendaciones}
+            onChange={e => setForm(f => ({ ...f, recomendaciones: e.target.value }))}
+          />
         </form>
       </Modal>
 
@@ -123,7 +152,7 @@ export default function Diagnosticos() {
         footer={<Button variant="secondary" onClick={close}>Cerrar</Button>}>
         {selected && (
           <dl className="space-y-3 text-sm">
-            <div><dt className="font-medium text-slate-500">Orden</dt><dd>{ordenLabel(selected.ordenTrabajoId ?? selected.ordenTrabajo?.id)}</dd></div>
+            <div><dt className="font-medium text-slate-500">Orden</dt><dd>{ordenLabel(selected.ordenTrabajo?.id)}</dd></div>
             <div><dt className="font-medium text-slate-500">Fallas</dt><dd className="whitespace-pre-wrap">{selected.fallas || '—'}</dd></div>
             <div><dt className="font-medium text-slate-500">Observaciones</dt><dd className="whitespace-pre-wrap">{selected.observaciones || '—'}</dd></div>
             <div><dt className="font-medium text-slate-500">Recomendaciones</dt><dd className="whitespace-pre-wrap">{selected.recomendaciones || '—'}</dd></div>
