@@ -15,6 +15,8 @@ public interface OrdenTrabajoRepository extends JpaRepository<OrdenTrabajo, Long
 
     List<OrdenTrabajo> findByEstado(String estado);
 
+    boolean existsByMecanicoId(Integer mecanicoId);
+
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM orden_trabajo WHERE id = :id", nativeQuery = true)

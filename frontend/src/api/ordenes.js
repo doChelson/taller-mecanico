@@ -1,13 +1,6 @@
-const BASE = '/api/ordenes';
+import { handleResponse } from './apiUtils';
 
-async function handleResponse(res) {
-  if (res.status === 204) return null;
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Error ${res.status}`);
-  }
-  return res.json();
-}
+const BASE = '/api/ordenes';
 
 export const getOrdenes = () => fetch(BASE).then(handleResponse);
 export const getOrden = (id) => fetch(`${BASE}/${id}`).then(handleResponse);

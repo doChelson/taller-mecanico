@@ -4,6 +4,7 @@ import com.example.signin.dto.PresupuestoDTO;
 import com.example.signin.model.OrdenTrabajo;
 import com.example.signin.model.Presupuesto;
 import com.example.signin.model.SolicitudRepuesto;
+import com.example.signin.repository.DocumentoPagoRepository;
 import com.example.signin.repository.OrdenTrabajoRepository;
 import com.example.signin.repository.PresupuestoRepository;
 import com.example.signin.repository.SolicitudRepuestoRepository;
@@ -17,12 +18,16 @@ public class PresupuestoService {
     private final PresupuestoRepository presupuestoRepository;
     private final OrdenTrabajoRepository ordenTrabajoRepository;
     private final SolicitudRepuestoRepository solicitudRepuestoRepository;
+    private final DocumentoPagoRepository documentoPagoRepository;
 
     public PresupuestoService(PresupuestoRepository presupuestoRepository,
                               OrdenTrabajoRepository ordenTrabajoRepository,
-                              SolicitudRepuestoRepository solicitudRepuestoRepository) {
+                              SolicitudRepuestoRepository solicitudRepuestoRepository,
+                              DocumentoPagoRepository documentoPagoRepository) {
         this.presupuestoRepository = presupuestoRepository;
         this.ordenTrabajoRepository = ordenTrabajoRepository;
+        this.solicitudRepuestoRepository = solicitudRepuestoRepository;
+        this.documentoPagoRepository = documentoPagoRepository;
         this.solicitudRepuestoRepository = solicitudRepuestoRepository;
     }
 
@@ -87,6 +92,11 @@ public class PresupuestoService {
     }
 
     public void eliminarPresupuesto(Long id) {
+        presupuestoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Presupuesto no encontrado"));
+        if (documentoPagoRepository.findByPresupuestoId(id).isPresent()) {
+            throw new RuntimeException("No se puede eliminar este presupuesto porque ya tiene un documento de pago emitido. Elimine primero el documento de pago.");
+        }
         presupuestoRepository.deleteById(id);
     }
 }

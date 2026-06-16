@@ -2,6 +2,7 @@ package com.example.signin.service;
 
 import com.example.signin.model.Mecanico;
 import com.example.signin.repository.MecanicoRepository;
+import com.example.signin.repository.OrdenTrabajoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.List;
 public class MecanicoService {
 
     private final MecanicoRepository mecanicoRepository;
+    private final OrdenTrabajoRepository ordenTrabajoRepository;
 
-    public MecanicoService(MecanicoRepository mecanicoRepository) {
+    public MecanicoService(MecanicoRepository mecanicoRepository, OrdenTrabajoRepository ordenTrabajoRepository) {
         this.mecanicoRepository = mecanicoRepository;
+        this.ordenTrabajoRepository = ordenTrabajoRepository;
     }
 
     public List<Mecanico> listarMecanicos() {
@@ -46,6 +49,11 @@ public class MecanicoService {
     }
 
     public void eliminarMecanico(Integer id) {
+        mecanicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mecánico no encontrado"));
+        if (ordenTrabajoRepository.existsByMecanicoId(id)) {
+            throw new RuntimeException("No se puede eliminar este mecánico porque tiene órdenes de trabajo asignadas. Reasigne las órdenes primero.");
+        }
         mecanicoRepository.deleteById(id);
     }
 }

@@ -3,6 +3,7 @@ package com.example.signin.service;
 import com.example.signin.dto.RepuestoDTO;
 import com.example.signin.model.Repuesto;
 import com.example.signin.repository.RepuestoRepository;
+import com.example.signin.repository.SolicitudRepuestoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class RepuestoService {
 
     private final RepuestoRepository repuestoRepository;
+    private final SolicitudRepuestoRepository solicitudRepuestoRepository;
 
-    public RepuestoService(RepuestoRepository repuestoRepository) {
+    public RepuestoService(RepuestoRepository repuestoRepository, SolicitudRepuestoRepository solicitudRepuestoRepository) {
         this.repuestoRepository = repuestoRepository;
+        this.solicitudRepuestoRepository = solicitudRepuestoRepository;
     }
 
     public List<Repuesto> listarRepuestos() {
@@ -74,6 +77,11 @@ public class RepuestoService {
     }
 
     public void eliminarRepuesto(Long id) {
+        repuestoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Repuesto no encontrado"));
+        if (solicitudRepuestoRepository.existsByRepuestoId(id)) {
+            throw new RuntimeException("No se puede eliminar este repuesto porque está siendo utilizado en solicitudes de repuesto activas. Elimine primero las solicitudes asociadas.");
+        }
         repuestoRepository.deleteById(id);
     }
 }

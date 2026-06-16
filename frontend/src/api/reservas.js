@@ -1,12 +1,6 @@
-const BASE = '/api/reservas';
+import { handleResponse } from './apiUtils';
 
-async function handleResponse(res) {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Error ${res.status}`);
-  }
-  return res.json();
-}
+const BASE = '/api/reservas';
 
 export const getReservas = () => fetch(BASE).then(handleResponse);
 export const createReserva = (data) =>
