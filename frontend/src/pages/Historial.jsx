@@ -84,24 +84,18 @@ export default function Historial() {
                 <div key={idx} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-800">Orden #{item.ordenId ?? item.id}</span>
-                      {item.estado && <Badge status={item.estado} />}
+                      <span className="text-sm font-semibold text-slate-800">Orden #{item.ordenId} — {item.numeroOrden}</span>
+                      {item.estadoOrden && <Badge status={item.estadoOrden} />}
                     </div>
                     <span className="text-sm text-slate-400">
-                      {item.fecha ? new Date(item.fecha).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
+                      {item.fechaIngreso ? new Date(item.fechaIngreso).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    {item.descripcion && (
+                    {item.diagnosticoPreliminar && (
                       <div className="sm:col-span-2">
-                        <span className="font-medium text-slate-500">Descripción: </span>
-                        <span className="text-slate-700">{item.descripcion}</span>
-                      </div>
-                    )}
-                    {item.diagnostico && (
-                      <div>
-                        <span className="font-medium text-slate-500">Diagnóstico: </span>
-                        <span className="text-slate-700">{item.diagnostico}</span>
+                        <span className="font-medium text-slate-500">Diagnóstico preliminar: </span>
+                        <span className="text-slate-700">{item.diagnosticoPreliminar}</span>
                       </div>
                     )}
                     {item.fallas && (
@@ -110,22 +104,28 @@ export default function Historial() {
                         <span className="text-slate-700">{item.fallas}</span>
                       </div>
                     )}
-                    {item.mecanico && (
+                    {item.recomendaciones && (
+                      <div>
+                        <span className="font-medium text-slate-500">Recomendaciones: </span>
+                        <span className="text-slate-700">{item.recomendaciones}</span>
+                      </div>
+                    )}
+                    {item.mecanicoNombre && (
                       <div>
                         <span className="font-medium text-slate-500">Mecánico: </span>
-                        <span className="text-slate-700">{item.mecanico}</span>
+                        <span className="text-slate-700">{item.mecanicoNombre} {item.mecanicoEspecialidad ? `(${item.mecanicoEspecialidad})` : ''}</span>
                       </div>
                     )}
-                    {item.montoTotal != null && (
+                    {item.montoPresupuesto != null && (
                       <div>
-                        <span className="font-medium text-slate-500">Total: </span>
-                        <span className="text-slate-700 font-semibold">${Number(item.montoTotal).toLocaleString('es-CL')}</span>
+                        <span className="font-medium text-slate-500">Presupuesto: </span>
+                        <span className="text-slate-700 font-semibold">${Number(item.montoPresupuesto).toLocaleString('es-CL')} ({item.estadoPresupuesto})</span>
                       </div>
                     )}
-                    {item.kilometraje != null && (
+                    {item.montoPagado != null && (
                       <div>
-                        <span className="font-medium text-slate-500">Kilometraje: </span>
-                        <span className="text-slate-700">{Number(item.kilometraje).toLocaleString('es-CL')} km</span>
+                        <span className="font-medium text-slate-500">Pagado ({item.tipoDocumento}): </span>
+                        <span className="text-slate-700 font-semibold">${Number(item.montoPagado).toLocaleString('es-CL')}</span>
                       </div>
                     )}
                   </div>

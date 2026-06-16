@@ -78,10 +78,10 @@ export default function Presupuestos() {
 
   const columns = [
     { key: 'id', header: 'ID', render: p => `#${p.id}` },
-    { key: 'orden', header: 'Orden', render: p => ordenLabel(p.ordenTrabajoId ?? p.ordenTrabajo?.id) },
+    { key: 'orden', header: 'Orden', render: p => ordenLabel(p.ordenTrabajo?.id) },
     { key: 'manoObra', header: 'Mano de obra', render: p => `$${Number(p.manoObra).toLocaleString('es-CL')}` },
     { key: 'montoTotal', header: 'Total', render: p => <span className="font-semibold">${Number(p.montoTotal ?? 0).toLocaleString('es-CL')}</span> },
-    { key: 'estado', header: 'Estado', render: p => estadoBadge(p.estado) },
+    { key: 'estado', header: 'Estado', render: p => estadoBadge(p.estadoAprobacion) },
     {
       key: 'acciones', header: 'Acciones',
       render: p => (
@@ -133,7 +133,7 @@ export default function Presupuestos() {
         footer={
           <div className="flex gap-2 w-full">
             <Button variant="secondary" onClick={close} className="mr-auto">Cerrar</Button>
-            {selected?.estado === 'PENDIENTE' && (
+            {selected?.estadoAprobacion === 'PENDIENTE' && (
               <>
                 <Button variant="danger" onClick={handleRechazar} loading={formLoading}>Rechazar</Button>
                 <Button onClick={handleAprobar} loading={formLoading}>Aprobar</Button>
@@ -144,8 +144,8 @@ export default function Presupuestos() {
         {formError && <p className="mb-3 text-sm text-red-600">{formError}</p>}
         {selected && (
           <dl className="space-y-3 text-sm">
-            <div><dt className="font-medium text-slate-500">Orden</dt><dd>{ordenLabel(selected.ordenTrabajoId ?? selected.ordenTrabajo?.id)}</dd></div>
-            <div><dt className="font-medium text-slate-500">Estado</dt><dd>{estadoBadge(selected.estado)}</dd></div>
+            <div><dt className="font-medium text-slate-500">Orden</dt><dd>{ordenLabel(selected.ordenTrabajo?.id)}</dd></div>
+            <div><dt className="font-medium text-slate-500">Estado</dt><dd>{estadoBadge(selected.estadoAprobacion)}</dd></div>
             <div><dt className="font-medium text-slate-500">Mano de obra</dt><dd>${Number(selected.manoObra).toLocaleString('es-CL')}</dd></div>
             <div><dt className="font-medium text-slate-500">Total</dt><dd className="font-bold text-lg">${Number(selected.montoTotal ?? 0).toLocaleString('es-CL')}</dd></div>
             {selected.detalle && <div><dt className="font-medium text-slate-500">Detalle</dt><dd className="whitespace-pre-wrap">{selected.detalle}</dd></div>}
