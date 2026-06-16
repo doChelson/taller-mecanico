@@ -95,11 +95,11 @@ export default function DocumentosPago() {
             <select value={form.presupuestoId} onChange={e => setForm(f => ({ ...f, presupuestoId: e.target.value }))} required
               className="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Seleccionar presupuesto…</option>
-              {presupuestos.filter(p => p.estado === 'APROBADO').map(p => (
-                <option key={p.id} value={p.id}>#{p.id} — ${Number(p.montoTotal ?? 0).toLocaleString('es-CL')} ({p.estado})</option>
+              {presupuestos.filter(p => p.estadoAprobacion === 'APROBADO').map(p => (
+                <option key={p.id} value={p.id}>#{p.id} — ${Number(p.montoTotal ?? 0).toLocaleString('es-CL')} ({p.estadoAprobacion})</option>
               ))}
             </select>
-            {presupuestos.filter(p => p.estado === 'APROBADO').length === 0 && (
+            {presupuestos.filter(p => p.estadoAprobacion === 'APROBADO').length === 0 && (
               <p className="text-xs text-amber-600 mt-1">Solo se pueden emitir documentos para presupuestos aprobados.</p>
             )}
           </div>
