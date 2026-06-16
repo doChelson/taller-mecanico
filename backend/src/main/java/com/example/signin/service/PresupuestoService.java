@@ -28,7 +28,6 @@ public class PresupuestoService {
         this.ordenTrabajoRepository = ordenTrabajoRepository;
         this.solicitudRepuestoRepository = solicitudRepuestoRepository;
         this.documentoPagoRepository = documentoPagoRepository;
-        this.solicitudRepuestoRepository = solicitudRepuestoRepository;
     }
 
     public List<Presupuesto> listarPresupuestos() {
