@@ -5,6 +5,14 @@ const colors = {
   PENDIENTE: 'bg-orange-100 text-orange-700',
   CONFIRMADA: 'bg-teal-100 text-teal-700',
   CANCELADA: 'bg-red-100 text-red-700',
+  DISPONIBLE: 'bg-green-100 text-green-700',
+  NO_DISPONIBLE: 'bg-slate-100 text-slate-500',
+  APROBADO: 'bg-green-100 text-green-700',
+  RECHAZADO: 'bg-red-100 text-red-700',
+  PAUSADO: 'bg-slate-100 text-slate-600',
+  COMPLETADO: 'bg-green-100 text-green-700',
+  APROBADA: 'bg-green-100 text-green-700',
+  RECHAZADA: 'bg-red-100 text-red-700',
 };
 
 export default function Badge({ status }) {
