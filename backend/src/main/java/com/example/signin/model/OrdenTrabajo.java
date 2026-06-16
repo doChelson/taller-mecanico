@@ -29,14 +29,16 @@ public class OrdenTrabajo {
     @JsonIgnoreProperties({"cliente"})
     private Vehiculo vehiculo;
 
+    @ManyToOne
+    @JoinColumn(name = "mecanico_id")
+    private Mecanico mecanico;
+
     @PrePersist
     protected void onCreate() {
         this.fechaIngreso = LocalDateTime.now();
-
         if (this.estado == null || this.estado.isBlank()) {
             this.estado = "CREADA";
         }
-
         if (this.numero == null || this.numero.isBlank()) {
             this.numero = "OT-" + System.currentTimeMillis();
         }
@@ -44,51 +46,24 @@ public class OrdenTrabajo {
 
     public OrdenTrabajo() {}
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getNumero() {
-        return numero;
-    }
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
 
-    public LocalDateTime getFechaIngreso() {
-        return fechaIngreso;
-    }
+    public LocalDateTime getFechaIngreso() { return fechaIngreso; }
+    public void setFechaIngreso(LocalDateTime fechaIngreso) { this.fechaIngreso = fechaIngreso; }
 
-    public String getEstado() {
-        return estado;
-    }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 
-    public String getDiagnosticoPreliminar() {
-        return diagnosticoPreliminar;
-    }
+    public String getDiagnosticoPreliminar() { return diagnosticoPreliminar; }
+    public void setDiagnosticoPreliminar(String diagnosticoPreliminar) { this.diagnosticoPreliminar = diagnosticoPreliminar; }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
-    }
+    public Vehiculo getVehiculo() { return vehiculo; }
+    public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-
-    public void setFechaIngreso(LocalDateTime fechaIngreso) {
-        this.fechaIngreso = fechaIngreso;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public void setDiagnosticoPreliminar(String diagnosticoPreliminar) {
-        this.diagnosticoPreliminar = diagnosticoPreliminar;
-    }
-
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
-    }
+    public Mecanico getMecanico() { return mecanico; }
+    public void setMecanico(Mecanico mecanico) { this.mecanico = mecanico; }
 }

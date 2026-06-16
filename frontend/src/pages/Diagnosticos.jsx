@@ -35,7 +35,7 @@ export default function Diagnosticos() {
   };
 
   const openCreate = () => { setForm(EMPTY); setFormError(''); setModal('create'); };
-  const openEdit = (d) => { setSelected(d); setForm({ fallas: d.fallas ?? '', observaciones: d.observaciones ?? '', recomendaciones: d.recomendaciones ?? '', ordenTrabajoId: d.ordenTrabajoId ?? d.ordenTrabajo?.id ?? '' }); setFormError(''); setModal('edit'); };
+  const openEdit = (d) => { setSelected(d); setForm({ fallas: d.fallas ?? '', observaciones: d.observaciones ?? '', recomendaciones: d.recomendaciones ?? '', ordenTrabajoId: d.ordenTrabajo?.id ?? '' }); setFormError(''); setModal('edit'); };
   const openDetail = (d) => { setSelected(d); setModal('detail'); };
   const openDelete = (d) => { setSelected(d); setFormError(''); setModal('delete'); };
   const close = () => { setModal(null); setSelected(null); };
@@ -61,7 +61,7 @@ export default function Diagnosticos() {
 
   const columns = [
     { key: 'id', header: 'ID', render: d => `#${d.id}` },
-    { key: 'orden', header: 'Orden', render: d => ordenLabel(d.ordenTrabajoId ?? d.ordenTrabajo?.id) },
+    { key: 'orden', header: 'Orden', render: d => ordenLabel(d.ordenTrabajo?.id) },
     { key: 'fallas', header: 'Fallas', render: d => <span className="line-clamp-1">{d.fallas || '—'}</span> },
     { key: 'recomendaciones', header: 'Recomendaciones', render: d => <span className="line-clamp-1">{d.recomendaciones || '—'}</span> },
     {
