@@ -1,12 +1,6 @@
-const BASE = '/api/vehiculos';
+import { handleResponse } from './apiUtils';
 
-async function handleResponse(res) {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Error ${res.status}`);
-  }
-  return res.json();
-}
+const BASE = '/api/vehiculos';
 
 export const getVehiculos = () => fetch(BASE).then(handleResponse);
 export const createVehiculo = (data) =>

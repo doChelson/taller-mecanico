@@ -1,10 +1,6 @@
-const BASE = '/api/solicitudes-repuestos';
+import { handleResponse } from './apiUtils';
 
-async function handleResponse(res) {
-  if (res.status === 204) return null;
-  if (!res.ok) { const t = await res.text(); throw new Error(t || `Error ${res.status}`); }
-  return res.json();
-}
+const BASE = '/api/solicitudes-repuestos';
 
 export const getSolicitudes = () => fetch(BASE).then(handleResponse);
 export const getSolicitud = (id) => fetch(`${BASE}/${id}`).then(handleResponse);

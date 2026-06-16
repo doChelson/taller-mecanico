@@ -1,10 +1,6 @@
-const BASE = '/api/avances';
+import { handleResponse } from './apiUtils';
 
-async function handleResponse(res) {
-  if (res.status === 204) return null;
-  if (!res.ok) { const t = await res.text(); throw new Error(t || `Error ${res.status}`); }
-  return res.json();
-}
+const BASE = '/api/avances';
 
 export const getAvances = () => fetch(BASE).then(handleResponse);
 export const getAvance = (id) => fetch(`${BASE}/${id}`).then(handleResponse);
