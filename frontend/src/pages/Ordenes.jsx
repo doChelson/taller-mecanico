@@ -9,7 +9,7 @@ import { getVehiculos } from '../api/vehiculos';
 import { getMecanicos } from '../api/mecanicos';
 
 const ESTADOS = ['CREADA', 'ASIGNADA', 'EN_PROCESO', 'FINALIZADA'];
-const EMPTY_FORM = { vehiculoId: '', estado: 'CREADA', diagnosticoPreliminar: '' };
+const EMPTY_FORM = { vehiculoId: '', mecanicoId: '', estado: 'CREADA', diagnosticoPreliminar: '' };
 
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([]);
@@ -52,7 +52,11 @@ export default function Ordenes() {
     setFormLoading(true);
     setFormError('');
     try {
-      await createOrden({ ...form, vehiculoId: Number(form.vehiculoId) });
+      await createOrden({
+        ...form,
+        vehiculoId: Number(form.vehiculoId),
+        mecanicoId: form.mecanicoId ? Number(form.mecanicoId) : null,
+      });
       load();
       closeModal();
     } catch (err) {
@@ -91,7 +95,6 @@ export default function Ordenes() {
     }
   };
 
-  const mecanicosDisponibles = mecanicos.filter((m) => m.disponible);
 
   const columns = [
     { key: 'numero', header: 'Número' },
@@ -189,6 +192,21 @@ export default function Ordenes() {
             </select>
           </div>
           <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-slate-700">Mecánico <span className="text-slate-400 text-xs">(opcional)</span></label>
+            <select
+              value={form.mecanicoId}
+              onChange={(e) => setForm((f) => ({ ...f, mecanicoId: e.target.value }))}
+              className="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Sin asignar</option>
+              {mecanicos.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre} — {m.especialidad}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-slate-700">Diagnóstico Preliminar</label>
             <textarea
               rows={3}
@@ -254,8 +272,8 @@ export default function Ordenes() {
                   onChange={(e) => setMecanicoId(e.target.value)}
                   className="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">{mecanicosDisponibles.length === 0 ? 'No hay mecánicos disponibles' : 'Seleccionar mecánico…'}</option>
-                  {mecanicosDisponibles.map((m) => (
+                  <option value="">{mecanicos.length === 0 ? 'No hay mecánicos registrados' : 'Seleccionar mecánico…'}</option>
+                  {mecanicos.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.nombre} — {m.especialidad}
                     </option>

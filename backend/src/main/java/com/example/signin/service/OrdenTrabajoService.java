@@ -43,9 +43,17 @@ public class OrdenTrabajoService {
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
         OrdenTrabajo orden = new OrdenTrabajo();
-        orden.setEstado(dto.getEstado());
         orden.setDiagnosticoPreliminar(dto.getDiagnosticoPreliminar());
         orden.setVehiculo(vehiculo);
+
+        if (dto.getMecanicoId() != null) {
+            Mecanico mecanico = mecanicoRepository.findById(dto.getMecanicoId())
+                    .orElseThrow(() -> new RuntimeException("Mecánico no encontrado"));
+            orden.setMecanico(mecanico);
+            orden.setEstado("ASIGNADA");
+        } else {
+            orden.setEstado(dto.getEstado() != null ? dto.getEstado() : "CREADA");
+        }
 
         return ordenTrabajoRepository.save(orden);
     }
@@ -57,22 +65,8 @@ public class OrdenTrabajoService {
         Mecanico mecanico = mecanicoRepository.findById(mecanicoId)
                 .orElseThrow(() -> new RuntimeException("Mecánico no encontrado"));
 
-        if (!mecanico.getDisponible()) {
-            throw new RuntimeException("El mecánico no está disponible actualmente");
-        }
-
-        // Si ya había un mecánico asignado, lo liberamos
-        if (orden.getMecanico() != null) {
-            Mecanico anterior = orden.getMecanico();
-            anterior.setDisponible(true);
-            mecanicoRepository.save(anterior);
-        }
-
         orden.setMecanico(mecanico);
         orden.setEstado("ASIGNADA");
-
-        mecanico.setDisponible(false);
-        mecanicoRepository.save(mecanico);
 
         return ordenTrabajoRepository.save(orden);
     }
