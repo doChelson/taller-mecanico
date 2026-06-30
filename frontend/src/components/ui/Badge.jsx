@@ -13,6 +13,11 @@ const colors = {
   COMPLETADO: 'bg-green-100 text-green-700',
   APROBADA: 'bg-green-100 text-green-700',
   RECHAZADA: 'bg-red-100 text-red-700',
+  ASIGNADA: 'bg-purple-100 text-purple-700',
+  PRESUPUESTADA: 'bg-indigo-100 text-indigo-700',
+  PRESUPUESTO_APROBADO: 'bg-teal-100 text-teal-700',
+  PRESUPUESTO_RECHAZADO: 'bg-red-100 text-red-700',
+  PAGADA: 'bg-green-100 text-green-700',
 };
 
 export default function Badge({ status }) {

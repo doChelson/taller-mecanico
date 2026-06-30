@@ -4,16 +4,17 @@ import Table from '../components/ui/Table';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Badge from '../components/ui/Badge';
-import Input from '../components/ui/Input';
-import { getOrdenes, createOrden, deleteOrden } from '../api/ordenes';
+import { getOrdenes, createOrden, deleteOrden, asignarMecanico } from '../api/ordenes';
 import { getVehiculos } from '../api/vehiculos';
+import { getMecanicos } from '../api/mecanicos';
 
-const ESTADOS = ['CREADA', 'EN_PROCESO', 'FINALIZADA'];
+const ESTADOS = ['CREADA', 'ASIGNADA', 'EN_PROCESO', 'FINALIZADA'];
 const EMPTY_FORM = { vehiculoId: '', estado: 'CREADA', diagnosticoPreliminar: '' };
 
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
+  const [mecanicos, setMecanicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
@@ -23,11 +24,16 @@ export default function Ordenes() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [mecanicoId, setMecanicoId] = useState('');
 
   const load = () => {
     setLoading(true);
-    Promise.all([getOrdenes(), getVehiculos()])
-      .then(([ords, vehs]) => { setOrdenes(ords); setVehiculos(vehs); })
+    Promise.all([getOrdenes(), getVehiculos(), getMecanicos()])
+      .then(([ords, vehs, mecs]) => {
+        setOrdenes(ords);
+        setVehiculos(vehs);
+        setMecanicos(mecs);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   };
@@ -37,9 +43,9 @@ export default function Ordenes() {
   const filtered = estadoFilter ? ordenes.filter((o) => o.estado === estadoFilter) : ordenes;
 
   const openCreate = () => { setForm(EMPTY_FORM); setFormError(''); setModal('create'); };
-  const openDetail = (o) => { setSelected(o); setModal('detail'); };
+  const openDetail = (o) => { setSelected(o); setMecanicoId(''); setFormError(''); setModal('detail'); };
   const openDelete = (o) => { setSelected(o); setFormError(''); setModal('delete'); };
-  const closeModal = () => { setModal(null); setSelected(null); };
+  const closeModal = () => { setModal(null); setSelected(null); setFormError(''); };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -49,6 +55,22 @@ export default function Ordenes() {
       await createOrden({ ...form, vehiculoId: Number(form.vehiculoId) });
       load();
       closeModal();
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleAsignar = async () => {
+    if (!mecanicoId) return;
+    setFormLoading(true);
+    setFormError('');
+    try {
+      const updated = await asignarMecanico(selected.id, Number(mecanicoId));
+      setSelected(updated);
+      setMecanicoId('');
+      load();
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -69,11 +91,14 @@ export default function Ordenes() {
     }
   };
 
+  const mecanicosDisponibles = mecanicos.filter((m) => m.disponible);
+
   const columns = [
     { key: 'numero', header: 'Número' },
     { key: 'fechaIngreso', header: 'Fecha Ingreso', render: (o) => o.fechaIngreso ? new Date(o.fechaIngreso).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }) : '—' },
     { key: 'estado', header: 'Estado', render: (o) => <Badge status={o.estado} /> },
     { key: 'vehiculo', header: 'Vehículo', render: (o) => o.vehiculo ? `${o.vehiculo.patente} – ${o.vehiculo.marca} ${o.vehiculo.modelo}` : '—' },
+    { key: 'mecanico', header: 'Mecánico', render: (o) => o.mecanico ? o.mecanico.nombre : <span className="text-slate-400 text-xs">Sin asignar</span> },
     {
       key: 'acciones', header: 'Acciones',
       render: (o) => (
@@ -189,19 +214,62 @@ export default function Ordenes() {
         }
       >
         {selected && (
-          <div className="space-y-3 text-sm">
+          <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-slate-400 text-xs mb-0.5">Número</p><p className="font-semibold text-slate-800">{selected.numero}</p></div>
               <div><p className="text-slate-400 text-xs mb-0.5">Estado</p><Badge status={selected.estado} /></div>
               <div><p className="text-slate-400 text-xs mb-0.5">Fecha Ingreso</p><p className="text-slate-700">{selected.fechaIngreso ? new Date(selected.fechaIngreso).toLocaleString('es-CL') : '—'}</p></div>
               <div><p className="text-slate-400 text-xs mb-0.5">Vehículo</p><p className="text-slate-700">{selected.vehiculo ? `${selected.vehiculo.patente} – ${selected.vehiculo.marca} ${selected.vehiculo.modelo}` : '—'}</p></div>
             </div>
+
             {selected.diagnosticoPreliminar && (
               <div>
                 <p className="text-slate-400 text-xs mb-0.5">Diagnóstico Preliminar</p>
                 <p className="text-slate-700 bg-slate-50 rounded-lg p-3">{selected.diagnosticoPreliminar}</p>
               </div>
             )}
+
+            {/* Sección mecánico */}
+            <div className="border-t border-slate-100 pt-3">
+              <p className="text-slate-400 text-xs mb-1">Mecánico Asignado</p>
+              {selected.mecanico ? (
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-semibold text-sm">
+                    {selected.mecanico.nombre?.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-800">{selected.mecanico.nombre}</p>
+                    <p className="text-xs text-slate-500">{selected.mecanico.especialidad}</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-slate-400 italic mb-3">Sin mecánico asignado</p>
+              )}
+
+              {formError && <p className="mb-2 text-sm text-red-600">{formError}</p>}
+
+              <div className="flex gap-2">
+                <select
+                  value={mecanicoId}
+                  onChange={(e) => setMecanicoId(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">{mecanicosDisponibles.length === 0 ? 'No hay mecánicos disponibles' : 'Seleccionar mecánico…'}</option>
+                  {mecanicosDisponibles.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.nombre} — {m.especialidad}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  onClick={handleAsignar}
+                  loading={formLoading}
+                  disabled={!mecanicoId}
+                >
+                  {selected.mecanico ? 'Cambiar' : 'Asignar'}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </Modal>

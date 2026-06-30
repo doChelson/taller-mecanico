@@ -1,8 +1,10 @@
 package com.example.signin.service;
 
 import com.example.signin.dto.OrdenTrabajoDTO;
+import com.example.signin.model.Mecanico;
 import com.example.signin.model.OrdenTrabajo;
 import com.example.signin.model.Vehiculo;
+import com.example.signin.repository.MecanicoRepository;
 import com.example.signin.repository.OrdenTrabajoRepository;
 import com.example.signin.repository.VehiculoRepository;
 import jakarta.persistence.EntityManager;
@@ -17,16 +19,19 @@ public class OrdenTrabajoService {
 
     private final OrdenTrabajoRepository ordenTrabajoRepository;
     private final VehiculoRepository vehiculoRepository;
+    private final MecanicoRepository mecanicoRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public OrdenTrabajoService(
             OrdenTrabajoRepository ordenTrabajoRepository,
-            VehiculoRepository vehiculoRepository
+            VehiculoRepository vehiculoRepository,
+            MecanicoRepository mecanicoRepository
     ) {
         this.ordenTrabajoRepository = ordenTrabajoRepository;
         this.vehiculoRepository = vehiculoRepository;
+        this.mecanicoRepository = mecanicoRepository;
     }
 
     public List<OrdenTrabajo> listarOrdenes() {
@@ -41,6 +46,33 @@ public class OrdenTrabajoService {
         orden.setEstado(dto.getEstado());
         orden.setDiagnosticoPreliminar(dto.getDiagnosticoPreliminar());
         orden.setVehiculo(vehiculo);
+
+        return ordenTrabajoRepository.save(orden);
+    }
+
+    public OrdenTrabajo asignarMecanico(Long ordenId, Integer mecanicoId) {
+        OrdenTrabajo orden = ordenTrabajoRepository.findById(ordenId)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        Mecanico mecanico = mecanicoRepository.findById(mecanicoId)
+                .orElseThrow(() -> new RuntimeException("Mecánico no encontrado"));
+
+        if (!mecanico.getDisponible()) {
+            throw new RuntimeException("El mecánico no está disponible actualmente");
+        }
+
+        // Si ya había un mecánico asignado, lo liberamos
+        if (orden.getMecanico() != null) {
+            Mecanico anterior = orden.getMecanico();
+            anterior.setDisponible(true);
+            mecanicoRepository.save(anterior);
+        }
+
+        orden.setMecanico(mecanico);
+        orden.setEstado("ASIGNADA");
+
+        mecanico.setDisponible(false);
+        mecanicoRepository.save(mecanico);
 
         return ordenTrabajoRepository.save(orden);
     }

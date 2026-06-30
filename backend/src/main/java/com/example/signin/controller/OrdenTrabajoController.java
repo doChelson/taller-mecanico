@@ -44,6 +44,13 @@ public class OrdenTrabajoController {
         return ordenTrabajoService.crearOrden(dto);
     }
 
+    @PutMapping("/{ordenId}/asignar-mecanico/{mecanicoId}")
+    public OrdenTrabajo asignarMecanico(
+            @PathVariable("ordenId") Long ordenId,
+            @PathVariable("mecanicoId") Integer mecanicoId) {
+        return ordenTrabajoService.asignarMecanico(ordenId, mecanicoId);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable("id") Long id) {

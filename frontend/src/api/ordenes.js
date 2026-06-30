@@ -10,3 +10,5 @@ export const createOrden = (data) =>
   fetch(BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(handleResponse);
 export const deleteOrden = (id) =>
   fetch(`${BASE}/${id}`, { method: 'DELETE' }).then(handleResponse);
+export const asignarMecanico = (ordenId, mecanicoId) =>
+  fetch(`${BASE}/${ordenId}/asignar-mecanico/${mecanicoId}`, { method: 'PUT' }).then(handleResponse);
