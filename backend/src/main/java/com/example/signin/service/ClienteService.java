@@ -16,16 +16,44 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final OrdenTrabajoRepository ordenTrabajoRepository;
     private final ReservaRepository reservaRepository;
+    private final ValidacionService validacionService;
 
-    public ClienteService(ClienteRepository clienteRepository,
-                          OrdenTrabajoRepository ordenTrabajoRepository,
-                          ReservaRepository reservaRepository) {
+    public ClienteService(
+        ClienteRepository clienteRepository,
+        OrdenTrabajoRepository ordenTrabajoRepository,
+        ReservaRepository reservaRepository,
+        ValidacionService validacionService
+    ) {
         this.clienteRepository = clienteRepository;
         this.ordenTrabajoRepository = ordenTrabajoRepository;
         this.reservaRepository = reservaRepository;
+        this.validacionService = validacionService;
     }
 
     public Cliente crearCliente(Cliente cliente) {
+        validarDatosCliente(cliente);
+
+        String rutFormateado =
+                validacionService.formatearRut(cliente.getRut());
+
+        if (clienteRepository.findByRut(rutFormateado).isPresent()) {
+            throw new IllegalArgumentException(
+                    "Ya existe un cliente registrado con ese RUT"
+            );
+        }
+
+        if (clienteRepository.findByEmail(cliente.getEmail()).isPresent()) {
+            throw new IllegalArgumentException(
+                    "Ya existe un cliente registrado con ese email"
+            );
+        }
+
+        cliente.setRut(rutFormateado);
+        cliente.setNombre(limpiarEspacios(cliente.getNombre()));
+        cliente.setTelefono(limpiarTexto(cliente.getTelefono()));
+        cliente.setEmail(cliente.getEmail().trim().toLowerCase());
+        cliente.setDireccion(limpiarTexto(cliente.getDireccion()));
+
         return clienteRepository.save(cliente);
     }
 
@@ -37,13 +65,46 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
 
-    public Cliente actualizarCliente(Integer id, Cliente clienteActualizado) {
+    public Cliente actualizarCliente(
+            Integer id,
+            Cliente clienteActualizado
+    ) {
         return clienteRepository.findById(id).map(cliente -> {
-            cliente.setNombre(clienteActualizado.getNombre());
-            cliente.setTelefono(clienteActualizado.getTelefono());
-            cliente.setDireccion(clienteActualizado.getDireccion());
+            validarDatosCliente(clienteActualizado);
+
+            String emailNormalizado =
+                    clienteActualizado.getEmail()
+                            .trim()
+                            .toLowerCase();
+
+            clienteRepository.findByEmail(emailNormalizado)
+                    .filter(clienteEncontrado ->
+                            !clienteEncontrado.getId().equals(id)
+                    )
+                    .ifPresent(clienteEncontrado -> {
+                        throw new IllegalArgumentException(
+                                "Ya existe otro cliente con ese email"
+                        );
+                    });
+
+            cliente.setNombre(
+                    limpiarEspacios(clienteActualizado.getNombre())
+            );
+
+            cliente.setTelefono(
+                    limpiarTexto(clienteActualizado.getTelefono())
+            );
+
+            cliente.setEmail(emailNormalizado);
+
+            cliente.setDireccion(
+                    limpiarTexto(clienteActualizado.getDireccion())
+            );
+
             return clienteRepository.save(cliente);
-        }).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        }).orElseThrow(
+                () -> new RuntimeException("Cliente no encontrado")
+        );
     }
 
     @Transactional
@@ -76,5 +137,59 @@ public class ClienteService {
 
     public Optional<Cliente> obtenerClientePorEmail(String email) {
         return clienteRepository.findByEmail(email);
+    }
+
+    private void validarDatosCliente(Cliente cliente) {
+        if (cliente == null) {
+            throw new IllegalArgumentException(
+                    "Los datos del cliente son obligatorios"
+            );
+        }
+
+        if (!validacionService.esRutValido(cliente.getRut())) {
+            throw new IllegalArgumentException(
+                    "El RUT ingresado no es válido"
+            );
+        }
+
+        if (!validacionService.esNombreCompletoValido(
+                cliente.getNombre()
+        )) {
+            throw new IllegalArgumentException(
+                    "Debe ingresar el nombre completo del cliente"
+            );
+        }
+
+        if (!validacionService.esTelefonoChilenoValido(
+                cliente.getTelefono()
+        )) {
+            throw new IllegalArgumentException(
+                    "El teléfono debe tener el formato +56912345678"
+            );
+        }
+
+        if (cliente.getEmail() == null || cliente.getEmail().isBlank()) {
+            throw new IllegalArgumentException(
+                    "El correo electrónico es obligatorio"
+            );
+        }
+
+        if (!validacionService.esEmailValido(cliente.getEmail())) {
+            throw new IllegalArgumentException(
+                    "El correo electrónico no tiene un formato válido"
+            );
+        }
+    }
+
+    private String limpiarEspacios(String texto) {
+        if (texto == null) {
+            return "";
+        }
+
+        return texto.trim().replaceAll("\\s+", " ");
+    }
+
+    private String limpiarTexto(String texto) {
+        return texto == null ? "" : texto.trim();
     }
 }

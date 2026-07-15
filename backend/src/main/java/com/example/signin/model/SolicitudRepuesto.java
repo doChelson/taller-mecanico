@@ -2,6 +2,7 @@ package com.example.signin.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,43 +19,118 @@ public class SolicitudRepuesto {
     @Column(nullable = false, length = 50)
     private String estado;
 
-    @Column(name = "fecha_solicitud", nullable = false, updatable = false)
+    @Column(
+            name = "fecha_solicitud",
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime fechaSolicitud;
 
+    @Column(name = "fecha_recepcion")
+    private LocalDateTime fechaRecepcion;
+
     @ManyToOne
-    @JoinColumn(name = "orden_trabajo_id", nullable = false)
-    @JsonIgnoreProperties({"vehiculo", "mecanico"})
+    @JoinColumn(
+            name = "orden_trabajo_id",
+            nullable = false
+    )
+    @JsonIgnoreProperties({
+            "vehiculo",
+            "mecanico"
+    })
     private OrdenTrabajo ordenTrabajo;
 
     @ManyToOne
-    @JoinColumn(name = "repuesto_id", nullable = false)
+    @JoinColumn(
+            name = "repuesto_id",
+            nullable = false
+    )
     private Repuesto repuesto;
 
     @PrePersist
     protected void onCreate() {
-        this.fechaSolicitud = LocalDateTime.now();
-        if (this.estado == null || this.estado.isBlank()) {
-            this.estado = "SOLICITADO";
+        this.fechaSolicitud =
+                LocalDateTime.now();
+
+        if (
+                this.estado == null
+                || this.estado.isBlank()
+        ) {
+            this.estado = "PENDIENTE";
         }
     }
 
-    public SolicitudRepuesto() {}
+    public SolicitudRepuesto() {
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Integer getCantidad() { return cantidad; }
-    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public Integer getCantidad() {
+        return cantidad;
+    }
 
-    public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
+    public void setCantidad(
+            Integer cantidad
+    ) {
+        this.cantidad = cantidad;
+    }
 
-    public OrdenTrabajo getOrdenTrabajo() { return ordenTrabajo; }
-    public void setOrdenTrabajo(OrdenTrabajo ordenTrabajo) { this.ordenTrabajo = ordenTrabajo; }
+    public String getEstado() {
+        return estado;
+    }
 
-    public Repuesto getRepuesto() { return repuesto; }
-    public void setRepuesto(Repuesto repuesto) { this.repuesto = repuesto; }
+    public void setEstado(
+            String estado
+    ) {
+        this.estado = estado;
+    }
+
+    public LocalDateTime getFechaSolicitud() {
+        return fechaSolicitud;
+    }
+
+    public void setFechaSolicitud(
+            LocalDateTime fechaSolicitud
+    ) {
+        this.fechaSolicitud =
+                fechaSolicitud;
+    }
+
+    public LocalDateTime getFechaRecepcion() {
+        return fechaRecepcion;
+    }
+
+    public void setFechaRecepcion(
+            LocalDateTime fechaRecepcion
+    ) {
+        this.fechaRecepcion =
+                fechaRecepcion;
+    }
+
+    public OrdenTrabajo getOrdenTrabajo() {
+        return ordenTrabajo;
+    }
+
+    public void setOrdenTrabajo(
+            OrdenTrabajo ordenTrabajo
+    ) {
+        this.ordenTrabajo =
+                ordenTrabajo;
+    }
+
+    public Repuesto getRepuesto() {
+        return repuesto;
+    }
+
+    public void setRepuesto(
+            Repuesto repuesto
+    ) {
+        this.repuesto = repuesto;
+    }
 }

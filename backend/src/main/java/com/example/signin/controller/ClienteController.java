@@ -60,12 +60,16 @@ public class ClienteController {
     ) {
         try {
             Cliente clienteActualizado = new Cliente();
-            clienteActualizado.setNombre(clienteDTO.getNombre());
-            clienteActualizado.setTelefono(clienteDTO.getTelefono());
-            clienteActualizado.setDireccion(clienteDTO.getDireccion());
+                clienteActualizado.setRut(clienteDTO.getRut());
+                clienteActualizado.setNombre(clienteDTO.getNombre());
+                clienteActualizado.setTelefono(clienteDTO.getTelefono());
+                clienteActualizado.setEmail(clienteDTO.getEmail());
+                clienteActualizado.setDireccion(clienteDTO.getDireccion());
 
             Cliente cliente = clienteService.actualizarCliente(id, clienteActualizado);
             return ResponseEntity.ok(convertToDTO(cliente));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

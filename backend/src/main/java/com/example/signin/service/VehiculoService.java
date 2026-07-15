@@ -29,9 +29,16 @@ public class VehiculoService {
 
     public Vehiculo crearVehiculo(Integer clienteId, Vehiculo vehiculo) {
         Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+                .orElseThrow(
+                        () -> new RuntimeException("Cliente no encontrado")
+                );
+
+        vehiculo.setPatente(
+                vehiculo.getPatente().trim().toUpperCase()
+        );
 
         vehiculo.setCliente(cliente);
+
         return vehiculoRepository.save(vehiculo);
     }
 
@@ -39,19 +46,34 @@ public class VehiculoService {
         return vehiculoRepository.findByClienteId(clienteId);
     }
 
-    public Vehiculo actualizarVehiculo(Integer id, Vehiculo vehiculoActualizado) {
+    public Vehiculo actualizarVehiculo(
+            Integer id,
+            Vehiculo vehiculoActualizado
+    ) {
         Vehiculo vehiculo = vehiculoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
+                .orElseThrow(
+                        () -> new RuntimeException("Vehículo no encontrado")
+                );
 
-        vehiculo.setPatente(vehiculoActualizado.getPatente());
-        vehiculo.setMarca(vehiculoActualizado.getMarca());
-        vehiculo.setModelo(vehiculoActualizado.getModelo());
+        /*
+        * La patente no se modifica porque identifica al vehículo.
+        */
+        vehiculo.setMarca(vehiculoActualizado.getMarca().trim());
+        vehiculo.setModelo(vehiculoActualizado.getModelo().trim());
         vehiculo.setAnio(vehiculoActualizado.getAnio());
+        vehiculo.setKilometraje(
+                vehiculoActualizado.getKilometraje()
+        );
 
         return vehiculoRepository.save(vehiculo);
     }
 
     public void eliminarVehiculo(Integer id) {
-        vehiculoRepository.deleteById(id);
+        Vehiculo vehiculo = vehiculoRepository.findById(id)
+                .orElseThrow(
+                        () -> new RuntimeException("Vehículo no encontrado")
+                );
+
+        vehiculoRepository.delete(vehiculo);
     }
 }

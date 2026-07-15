@@ -22,6 +22,8 @@ public class Repuesto {
     @Column(name = "precio_unitario", nullable = false)
     private Double precioUnitario;
 
+    
+
     public Repuesto() {}
 
     public Long getId() { return id; }
