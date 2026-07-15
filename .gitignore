@@ -21,6 +21,9 @@ node_modules/
 build/
 dist/
 
+# Frontend compilado dentro del backend (lo genera el despliegue, no va en el repo)
+backend/src/main/resources/static/
+
 # Env
 .env
 
