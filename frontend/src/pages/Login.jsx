@@ -7,7 +7,7 @@ import Input from '../components/ui/Input';
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [empresa, setEmpresa] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      await login(empresa, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
@@ -52,12 +52,12 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Correo electrónico"
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="usuario@ejemplo.com"
+              label="Empresa"
+              id="empresa"
+              type="text"
+              value={empresa}
+              onChange={(e) => setEmpresa(e.target.value)}
+              placeholder="Nombre de la empresa"
               required
             />
             <Input

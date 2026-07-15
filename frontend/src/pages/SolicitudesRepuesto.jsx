@@ -5,11 +5,12 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import Badge from '../components/ui/Badge';
-import { getSolicitudes, createSolicitud, deleteSolicitud } from '../api/solicitudesRepuesto';
+import { getSolicitudes, createSolicitud, confirmarRecepcion, deleteSolicitud } from '../api/solicitudesRepuesto';
 import { getOrdenes } from '../api/ordenes';
 import { getRepuestos } from '../api/repuestos';
 
-const ESTADOS_SOLICITUD = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
+const ESTADOS_CREACION = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
+const ESTADOS_FILTRO = ['PENDIENTE', 'APROBADA', 'RECHAZADA', 'RECIBIDA'];
 const EMPTY = { ordenTrabajoId: '', repuestoId: '', cantidad: '', estado: 'PENDIENTE' };
 
 export default function SolicitudesRepuesto() {
@@ -47,6 +48,7 @@ export default function SolicitudesRepuesto() {
 
   const openCreate = () => { setForm(EMPTY); setFormError(''); setModal('create'); };
   const openDelete = (s) => { setSelected(s); setFormError(''); setModal('delete'); };
+  const openConfirmar = (s) => { setSelected(s); setFormError(''); setModal('confirmar'); };
   const close = () => { setModal(null); setSelected(null); };
 
   const handleSave = async (e) => {
@@ -71,7 +73,14 @@ export default function SolicitudesRepuesto() {
     finally { setFormLoading(false); }
   };
 
-  const estadoColor = { PENDIENTE: 'PENDIENTE', APROBADA: 'FINALIZADA', RECHAZADA: 'CANCELADA' };
+  const handleConfirmar = async () => {
+    setFormLoading(true);
+    try { await confirmarRecepcion(selected.id); load(); close(); }
+    catch (err) { setFormError(err.message); }
+    finally { setFormLoading(false); }
+  };
+
+  const estadoColor = { PENDIENTE: 'PENDIENTE', APROBADA: 'FINALIZADA', RECHAZADA: 'CANCELADA', RECIBIDA: 'CONFIRMADA' };
 
   const columns = [
     { key: 'id', header: 'ID', render: s => `#${s.id}` },
@@ -82,9 +91,18 @@ export default function SolicitudesRepuesto() {
     {
       key: 'acciones', header: 'Acciones',
       render: s => (
-        <button onClick={() => openDelete(s)} className="p-1.5 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-        </button>
+        <div className="flex gap-1">
+          {s.estado === 'APROBADA' && (
+            <button onClick={() => openConfirmar(s)} title="Confirmar recepción"
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-green-50 hover:text-green-600 transition-colors">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+          )}
+          <button onClick={() => openDelete(s)} title="Eliminar"
+            className="p-1.5 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        </div>
       )
     }
   ];
@@ -94,7 +112,7 @@ export default function SolicitudesRepuesto() {
       {error && <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
         <div className="flex gap-2 flex-wrap">
-          {['TODOS', ...ESTADOS_SOLICITUD].map(e => (
+          {['TODOS', ...ESTADOS_FILTRO].map(e => (
             <button key={e} onClick={() => setFiltroEstado(e)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtroEstado === e ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'}`}>
               {e === 'TODOS' ? 'Todos' : e}
@@ -133,7 +151,7 @@ export default function SolicitudesRepuesto() {
             <label className="text-sm font-medium text-slate-700">Estado inicial</label>
             <select value={form.estado} onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}
               className="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {ESTADOS_SOLICITUD.map(e => <option key={e} value={e}>{e}</option>)}
+              {ESTADOS_CREACION.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
         </form>
@@ -143,6 +161,14 @@ export default function SolicitudesRepuesto() {
         footer={<><Button variant="secondary" onClick={close}>Cancelar</Button><Button variant="danger" onClick={handleDelete} loading={formLoading}>Eliminar</Button></>}>
         {formError && <p className="mb-3 text-sm text-red-600">{formError}</p>}
         <p className="text-slate-600 text-sm">¿Eliminar la solicitud <strong>#{selected?.id}</strong>? Esta acción no se puede deshacer.</p>
+      </Modal>
+
+      <Modal isOpen={modal === 'confirmar'} onClose={close} title="Confirmar recepción" size="sm"
+        footer={<><Button variant="secondary" onClick={close}>Cancelar</Button><Button onClick={handleConfirmar} loading={formLoading}>Confirmar recepción</Button></>}>
+        {formError && <p className="mb-3 text-sm text-red-600">{formError}</p>}
+        <p className="text-slate-600 text-sm">
+          ¿Confirmas la recepción de la solicitud <strong>#{selected?.id}</strong>? Esto sumará el repuesto al stock y marcará la solicitud como <strong>RECIBIDA</strong>.
+        </p>
       </Modal>
     </Layout>
   );

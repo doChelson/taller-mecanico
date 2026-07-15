@@ -8,10 +8,10 @@ export default function Header({ title }) {
       <div className="flex items-center gap-2">
         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
           <span className="text-white text-xs font-bold uppercase">
-            {user?.email?.[0] ?? 'U'}
+            {user?.empresa?.[0] ?? 'U'}
           </span>
         </div>
-        <span className="text-sm text-slate-600 hidden sm:block">{user?.email}</span>
+        <span className="text-sm text-slate-600 hidden sm:block">{user?.empresa}</span>
       </div>
     </header>
   );
