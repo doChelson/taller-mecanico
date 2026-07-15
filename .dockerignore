@@ -1,0 +1,9 @@
+# No subir cosas pesadas o innecesarias al construir la imagen
+**/node_modules
+**/target
+**/dist
+.git
+.github
+.claude
+*.md
+publish-profile.xml
